@@ -2,27 +2,34 @@ import React, { Component } from "react";
 import { ExistedDraft } from "./ExistedDraft"; //error for e
 import { NewDraft } from "./NewDraft";
 
+type Page = "main" | "pick";
+
 interface AppState {
-  // will probably need something here
+  page: Page;
+  curDrafter: string;
 }
 
 export class App extends Component<{}, AppState> {
   constructor(props: any) {
     super(props);
 
-    this.state = {};
+    this.state = { page: "main", curDrafter: "" };
   }
 
   render = (): JSX.Element => {
-    return (
-      <div>
+    if (this.state.page === "main") {
+      return (
         <div>
-          <label htmlFor="name">Drafter: </label>
-          <input id="name" type="text"></input>
+          <ExistedDraft onPick={this.handlePick}></ExistedDraft>
+          <NewDraft onPick={this.handlePick}></NewDraft>
         </div>
-        <ExistedDraft></ExistedDraft>
-        <NewDraft></NewDraft>
-      </div>
-    );
+      );
+    } else {
+      return <p>working on...</p>;
+    }
+  };
+
+  handlePick = (): void => {
+    this.setState({ page: "pick" });
   };
 }
