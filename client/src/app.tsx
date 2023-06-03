@@ -1,8 +1,9 @@
 import React, { Component } from "react";
 import { ExistedDraft } from "./ExistedDraft"; //error for e
 import { NewDraft } from "./NewDraft";
+import { Draft } from "./draft";
 
-type Page = "main" | "pick";
+type Page = "main" | { kind: "pick"; draft: Draft };
 
 interface AppState {
   page: Page;
@@ -20,7 +21,8 @@ export class App extends Component<{}, AppState> {
     if (this.state.page === "main") {
       return (
         <div>
-          <ExistedDraft onPick={this.handlePick}></ExistedDraft>
+          {/* <ExistedDraft onPick={this.handlePick}></ExistedDraft> */}
+          <ExistedDraft></ExistedDraft>
           <NewDraft onPick={this.handlePick}></NewDraft>
         </div>
       );
@@ -29,7 +31,11 @@ export class App extends Component<{}, AppState> {
     }
   };
 
-  handlePick = (): void => {
-    this.setState({ page: "pick" });
+  handlePick = (draft: Draft): void => {
+    this.setState({ page: { kind: "pick", draft: draft } });
+
+    console.log("-----draft-----");
+    console.log(draft);
+    console.log("-----draft-----");
   };
 }

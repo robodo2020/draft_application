@@ -1,7 +1,9 @@
 import React, { Component, ChangeEvent, MouseEvent } from "react";
+// import { Draft } from "./draft";
 
 interface ExistedProps {
-  onPick: () => void;
+  // onPick: (draft: Draft) => void;
+  // onPick: () => void;
 }
 
 interface ExistedState {
@@ -70,7 +72,7 @@ export class ExistedDraft extends Component<ExistedProps, ExistedState> {
 
     fetch(url, { method: "GET" })
       .then(this.handleExistDraft)
-      .then(this.props.onPick)
+      // .then(this.props.onPick)
       .catch((err) => {
         this.handleServerError(
           "error happens during joining existing draft",

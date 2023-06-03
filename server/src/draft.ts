@@ -1,24 +1,25 @@
 export interface Draft {
-  countOptions(options: string[]): Map<string, number>;
+  // countOptions(options: string[]): Map<string, number>;
 
   toList(itemsString: string): string[];
 }
 
-export class simpleDraft implements Draft {
+type selectedOptions = Map<string, number>;
+
+export class countDraft implements Draft {
   readonly rounds: number;
-  curDrafter: string;
+  curDrafterName: string;
   options: Map<string, number>; // key: the option, value: counter
-  // drafters: Set<Drafter>;
-  drafters: Map<string, Map<string, number>>; // key: drafterName, value: selectedOptions
+  drafters: Map<string, selectedOptions>; // key: drafterName, value: selectedOptions
 
   // TODO: how to operate curDrafter?
   constructor(
-    curDrafter: string,
+    curDrafterName: string,
     rounds: number,
     options: string,
     drafters: string
   ) {
-    this.curDrafter = curDrafter;
+    this.curDrafterName = curDrafterName;
     this.rounds = rounds;
     this.options = this.makeOptionsMap(options);
     this.drafters = this.makeDraftersMap(drafters);
@@ -57,11 +58,11 @@ export class simpleDraft implements Draft {
     const draftersNameList = this.toList(draftersName);
 
     // create the main draft for uses
-    const DrafterResult = new Map<string, Map<string, number>>();
+    const DrafterResult = new Map<string, selectedOptions>();
 
     // put drafters name into draft
     for (const drafterName of draftersNameList) {
-      const selectedOptions = new Map<string, number>(); // initial select option is empty
+      const selectedOptions: selectedOptions = new Map<string, number>(); // initial select option is empty
 
       DrafterResult.set(drafterName, selectedOptions);
     }
@@ -71,15 +72,15 @@ export class simpleDraft implements Draft {
 }
 
 /**
- * Factory method that makes the makeSimpleDraft object
+ * Factory method that makes the makeCountDraft object
  * @param
- * @returns the makeSimpleDraft object
+ * @returns the makeCountDraft object
  */
-export function makeSimpleDraft(
+export function makeCountDraft(
   curDrafter: string,
   rounds: number,
   options: string,
   drafters: string
-): simpleDraft {
-  return new simpleDraft(curDrafter, rounds, options, drafters);
+): countDraft {
+  return new countDraft(curDrafter, rounds, options, drafters);
 }

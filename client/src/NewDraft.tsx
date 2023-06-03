@@ -1,7 +1,8 @@
 import React, { Component, MouseEvent, ChangeEvent } from "react";
-
+// import { makeSimpleDraft, simpleDraft } from "./simpleDraft";
+import { Draft, parseDraft, hasDuplicate } from "./draft";
 interface NewDraftProps {
-  onPick: () => void;
+  onPick: (draft: Draft) => void;
 }
 
 interface NewDraftState {
@@ -16,8 +17,8 @@ export class NewDraft extends Component<NewDraftProps, NewDraftState> {
     super(props);
 
     this.state = {
-      options: "", // should it be string[]?
-      drafters: "", // should it be string[]?
+      options: "",
+      drafters: "",
       rounds: 1,
       curDrafterName: "",
     };
@@ -98,9 +99,18 @@ export class NewDraft extends Component<NewDraftProps, NewDraftState> {
       this.state.options.length > 0 &&
       this.state.drafters.length > 0
     ) {
+      // organize the data first, then send to backend
+      // check drafter no duplicate
+      if (hasDuplicate(this.state.drafters)) {
+        console.error("drafter cannot put duplicate item");
+        return;
+      }
+      // TODO: check curDrafterName in drafter or not
+      // will add curDrafterName to this.state.drafters, currently assume it exist in
+
       const url =
         "/api/add" +
-        "?curDrafter=" +
+        "?curDrafterName=" +
         encodeURIComponent(this.state.curDrafterName) +
         "&rounds=" +
         encodeURIComponent(this.state.rounds) +
@@ -109,13 +119,44 @@ export class NewDraft extends Component<NewDraftProps, NewDraftState> {
         "&drafters=" +
         encodeURIComponent(this.state.drafters);
       fetch(url, { method: "POST" })
-        .then(this.props.onPick)
+        .then(this.handleAddResponse)
+        // .then(this.props.onPick)
         .catch((err) => {
           this.handleServerError(
             "error happens during creating the new draft",
             err
           );
         });
+    }
+  };
+
+  // the reason need this is because use this data for picking
+  handleAddResponse = (res: Response) => {
+    if (res.status === 200) {
+      res
+        .json()
+        .then(this.handleAddJson)
+        .catch((err) => {
+          this.handleServerError("", err);
+        });
+    } else {
+      this.handleServerError("", res);
+    }
+  };
+
+  // the data sent from backend side
+  handleAddJson = (val: any) => {
+    if (typeof val !== "object" || val === null) {
+      console.error("bad data from /add: not a record", val);
+      return;
+    }
+
+    console.log("check point0");
+    console.log(val);
+
+    const draft = parseDraft(val);
+    if (draft !== undefined) {
+      this.props.onPick(val);
     }
   };
 

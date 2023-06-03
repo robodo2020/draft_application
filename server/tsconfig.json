@@ -6,7 +6,7 @@
     "moduleResolution": "node",
     "outDir": "dist",
     "rootDir": "src",
-    "lib": [ "es2016", "dom" ],
+    "lib": ["es2016", "dom"],
     "allowJs": true,
     "jsx": "react",
     "strict": true,
@@ -18,5 +18,9 @@
     "inlineSourceMap": true,
     "downlevelIteration": true
   },
-  "include": ["src/**/*"]
+  "include": [
+    "src/**/*",
+    "../client/src/draft_test.ts",
+    "../client/src/draft_test.ts"
+  ]
 }

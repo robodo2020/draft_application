@@ -1,20 +1,19 @@
 import { Request, Response } from "express";
-import { makeSimpleDraft, simpleDraft } from "./draft";
+import { makeCountDraft, countDraft } from "./draft";
 
 // can we create a global id as draft id?
 let INITDRAFTID: number = 0;
 
 // DraftMap is the main database to store all the Draft Information
-const DraftMap: Map<number, simpleDraft> = new Map();
+const DraftMap: Map<number, countDraft> = new Map();
 
 export function addDraft(req: Request, res: Response) {
-  const curDrafter = req.query.curDrafter;
-  if (curDrafter === undefined || typeof curDrafter !== "string") {
+  const curDrafterName = req.query.curDrafterName;
+  if (curDrafterName === undefined || typeof curDrafterName !== "string") {
     res.status(400).send("missing 'curDrafter' parameter");
     return;
   }
 
-  // TODO: check can turn to int
   const rounds = req.query.rounds;
   if (rounds === undefined || typeof rounds !== "string") {
     res.status(400).send("missing 'rounds' parameter");
@@ -32,25 +31,44 @@ export function addDraft(req: Request, res: Response) {
     res.status(400).send("missing 'drafters' parameter");
     return;
   }
-
-  const draft: simpleDraft = makeSimpleDraft(
-    curDrafter,
+  // put data in our server side
+  const draft: countDraft = makeCountDraft(
+    curDrafterName,
     parseInt(rounds),
     options,
     drafters
   );
 
   DraftMap.set(INITDRAFTID, draft);
-  INITDRAFTID++;
+
+  // send data to client side
+  const allOptionsObject = Object.fromEntries(draft.options);
+  const allOptionsJson = JSON.stringify(allOptionsObject);
+
+  const selectedOptions = draft.drafters.get(draft.curDrafterName);
+  if (selectedOptions === undefined) {
+    throw new Error("curDrafterName doesn't exist inside draft map");
+  }
+  const selectedOptionsObject = Object.fromEntries(selectedOptions);
+  const selectedOptionsJson = JSON.stringify(selectedOptionsObject);
 
   console.log(DraftMap);
-  res.send(draft);
+  res.send({
+    draftId: INITDRAFTID,
+    curDrafterName: draft.curDrafterName,
+    pickedItems: selectedOptionsJson,
+    rounds: draft.rounds, // TODO: maybe need to send curRound record
+    allOptions: allOptionsJson,
+    // TODO: who's executing round name
+  });
+
+  INITDRAFTID++;
 }
 
 // load the exists drafts
 // export function loadExistDrafts(req: Request, res: Response) {
 export function loadExistDrafts(_: Request, res: Response) {
-  res.send(DraftMap);
+  res.send({ d: DraftMap });
 
   // console.log("testtesttest");
   // const draftIdStr = req.query.draftId;
