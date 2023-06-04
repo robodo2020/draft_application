@@ -1,6 +1,7 @@
 import * as assert from "assert";
 import * as httpMocks from "node-mocks-http";
 import { Dummy, loadExistDrafts, addDraft } from "./routes";
+// import { Dummy, addDraft } from "./routes";
 // import { countDraft, makeSimpleDraft } from "./draft";
 
 describe("routes", function () {
@@ -22,7 +23,7 @@ describe("routes", function () {
       url: "/api/add",
       query: {
         curDrafterName: "ab",
-        rounds: "0",
+        rounds: "2",
         options: "a\nb\nc\nd",
         drafters: "ab\nbc\ncd\nde",
       },
@@ -34,10 +35,10 @@ describe("routes", function () {
     assert.strictEqual(res1._getStatusCode(), 200);
     assert.deepStrictEqual(res1._getData(), {
       draftId: 0,
-      curDrafterName: "ab",
-      pickedItems: "{}",
-      rounds: 0,
-      allOptions: '{"a":1,"b":1,"c":1,"d":1}',
+      pickedOptions: [],
+      rounds: 2,
+      drafters: ["ab", "bc", "cd", "de"],
+      allOptions: ["a", "b", "c", "d"],
     });
 
     const req2 = httpMocks.createRequest({
@@ -55,10 +56,10 @@ describe("routes", function () {
     const data2 = res2._getData();
     assert.deepStrictEqual(data2, {
       draftId: 0,
-      curDrafterName: "bc",
-      pickedItems: "{}",
-      rounds: 0,
-      allOptions: '{"a":1,"b":1,"c":1,"d":1}',
+      pickedOptions: [],
+      rounds: 2,
+      drafters: ["ab", "bc", "cd", "de"],
+      allOptions: ["a", "b", "c", "d"],
     });
   });
 });

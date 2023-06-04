@@ -69,7 +69,6 @@ export class ExistedDraft extends Component<ExistedProps, ExistedState> {
 
     fetch(url, { method: "GET" })
       .then(this.handleGetExistDraft)
-      // .then(this.props.onPick)
       .catch((err) => {
         this.handleServerError(
           "error happens during retrieving existing draft",
@@ -107,7 +106,6 @@ export class ExistedDraft extends Component<ExistedProps, ExistedState> {
     if (draft !== undefined) {
       this.props.onPick(val);
       this.props.onDrafterNameChange(this.state.curDrafterName);
-      console.log(typeof draft.allOptions);
     }
   };
 

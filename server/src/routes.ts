@@ -1,19 +1,20 @@
 import { Request, Response } from "express";
-import { makeCountDraft, countDraft } from "./draft";
+// import { countDraft } from "./draft";
+
+type Draft = {
+  rounds: number;
+  allOptions: string[];
+  drafters: string[];
+  pickedOptions: [string, string][]; // option, drafter
+};
 
 // can we create a global id as draft id?
 let INITDRAFTID: number = 0;
 
 // DraftMap is the main database to store all the Draft Information
-const DraftMap: Map<number, countDraft> = new Map();
+const DraftMap: Map<number, Draft> = new Map();
 
 export function addDraft(req: Request, res: Response) {
-  const curDrafterName = req.query.curDrafterName;
-  if (curDrafterName === undefined || typeof curDrafterName !== "string") {
-    res.status(400).send("missing 'curDrafter' parameter");
-    return;
-  }
-
   const rounds = req.query.rounds;
   if (rounds === undefined || typeof rounds !== "string") {
     res.status(400).send("missing 'rounds' parameter");
@@ -34,34 +35,19 @@ export function addDraft(req: Request, res: Response) {
     return;
   }
   // put data in our server side
-  const draft: countDraft = makeCountDraft(
-    curDrafterName,
-    parseInt(rounds),
-    options,
-    drafters
-  );
+  const draft: Draft = makeDraft(rounds, options, drafters);
 
   DraftMap.set(INITDRAFTID, draft);
 
   // send data to client side
-  const allOptionsObject = Object.fromEntries(draft.options);
-  const allOptionsJson = JSON.stringify(allOptionsObject);
-
-  const selectedOptions = draft.drafters.get(draft.curDrafterName);
-  if (selectedOptions === undefined) {
-    throw new Error("curDrafterName doesn't exist inside draft map");
-  }
-  const selectedOptionsObject = Object.fromEntries(selectedOptions);
-  const selectedOptionsJson = JSON.stringify(selectedOptionsObject);
 
   console.log(DraftMap);
   res.send({
     draftId: INITDRAFTID,
-    curDrafterName: draft.curDrafterName,
-    pickedItems: selectedOptionsJson,
-    rounds: draft.rounds, // TODO: maybe need to send curRound record
-    allOptions: allOptionsJson,
-    // TODO: who's executing round name
+    pickedOptions: draft.pickedOptions,
+    rounds: draft.rounds,
+    allOptions: draft.allOptions,
+    drafters: draft.drafters,
   });
 
   INITDRAFTID++;
@@ -70,14 +56,12 @@ export function addDraft(req: Request, res: Response) {
 // load the exists drafts
 // export function loadExistDrafts(req: Request, res: Response) {
 export function loadExistDrafts(req: Request, res: Response) {
-  console.log("testtesttest");
   const curDrafterName = req.query.curDrafterName;
   if (curDrafterName === undefined || typeof curDrafterName !== "string") {
     res.status(400).send("missing 'curDrafter' parameter");
     return;
   }
   const draftIdStr = req.query.draftId;
-
   if (draftIdStr === undefined || typeof draftIdStr !== "string") {
     res.status(400).send("missing 'draftId' parameter");
     return;
@@ -92,30 +76,56 @@ export function loadExistDrafts(req: Request, res: Response) {
     res.status(400).send("draftId doesn't exist");
     return;
   }
-  // TODO: might affect due to this line is get method
-  curDraft.curDrafterName = curDrafterName;
-
-  const selectedOptions = curDraft.drafters.get(curDraft.curDrafterName);
-  if (selectedOptions === undefined) {
-    res.status(400).send("drafter name doesn't exist in this draft");
-    return;
-  }
-
-  // make it Jsonize
-  const allOptionsObject = Object.fromEntries(curDraft.options);
-  const allOptionsJson = JSON.stringify(allOptionsObject);
-
-  const selectedOptionsObject = Object.fromEntries(selectedOptions);
-  const selectedOptionsJson = JSON.stringify(selectedOptionsObject);
 
   console.log(curDraft);
 
   res.send({
     draftId: draftId,
-    curDrafterName: curDrafterName,
-    pickedItems: selectedOptionsJson,
-    rounds: curDraft.rounds, // TODO: maybe need to send curRound record
-    allOptions: allOptionsJson,
+    pickedOptions: curDraft.pickedOptions,
+    rounds: curDraft.rounds,
+    allOptions: curDraft.allOptions,
+    drafters: curDraft.drafters,
+  });
+}
+
+export function updateDraft(req: Request, res: Response) {
+  const curPickOption = req.query.curPickOption;
+  if (curPickOption === undefined || typeof curPickOption !== "string") {
+    res.status(400).send("missing 'curPickOption' parameter");
+    return;
+  }
+
+  const draftIdStr = req.query.draftId;
+  if (draftIdStr === undefined || typeof draftIdStr !== "string") {
+    res.status(400).send("missing 'draftId' parameter");
+    return;
+  }
+
+  const curDrafter = req.query.curDrafter;
+  if (curDrafter === undefined || typeof curDrafter !== "string") {
+    res.status(400).send("missing 'curDrafter' parameter");
+    return;
+  }
+
+  const draftId = parseInt(draftIdStr);
+  const curDraft = DraftMap.get(draftId);
+  if (curDraft === undefined) {
+    res.status(400).send("draftId doesn't exist");
+    return;
+  }
+
+  curDraft.pickedOptions.push([curPickOption, curDrafter]);
+  const itemIdx = curDraft.allOptions.indexOf(curPickOption);
+  if (itemIdx === -1) {
+    res.status(400).send("curPickOption doesn't exist in the allOptions");
+    return;
+  }
+  curDraft.allOptions.splice(itemIdx, 1);
+
+  res.send({
+    allOptions: curDraft.allOptions,
+    pickedOption: curPickOption,
+    curDrafter: curDrafter,
   });
 }
 
@@ -149,4 +159,27 @@ function first(param: any): string | undefined {
   } else {
     return undefined;
   }
+}
+
+function toList(itemsString: string): string[] {
+  const itemsList: string[] = itemsString
+    .split("\n")
+    .map((item) => item.trim())
+    .filter((item) => item !== "");
+
+  return itemsList;
+}
+
+export function makeDraft(
+  rounds: string,
+  allOptions: string,
+  drafters: string
+): Draft {
+  const draft: Draft = {
+    rounds: parseInt(rounds),
+    allOptions: toList(allOptions),
+    drafters: toList(drafters),
+    pickedOptions: [],
+  };
+  return draft;
 }

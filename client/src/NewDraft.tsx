@@ -111,9 +111,7 @@ export class NewDraft extends Component<NewDraftProps, NewDraftState> {
 
       const url =
         "/api/add" +
-        "?curDrafterName=" +
-        encodeURIComponent(this.state.curDrafterName) +
-        "&rounds=" +
+        "?rounds=" +
         encodeURIComponent(this.state.rounds) +
         "&options=" +
         encodeURIComponent(this.state.options) +
@@ -133,15 +131,19 @@ export class NewDraft extends Component<NewDraftProps, NewDraftState> {
 
   // the reason need this is because use this data for picking
   handleAddResponse = (res: Response) => {
+    console.log(res);
     if (res.status === 200) {
       res
         .json()
         .then(this.handleAddJson)
         .catch((err) => {
-          this.handleServerError("", err);
+          this.handleServerError(
+            "error happens when parsing response to Json format",
+            err
+          );
         });
     } else {
-      this.handleServerError("", res);
+      this.handleServerError("error: Response from /add is not 200", res);
     }
   };
 
@@ -154,7 +156,11 @@ export class NewDraft extends Component<NewDraftProps, NewDraftState> {
 
     console.log(val);
 
-    const draft = parseDraft(val);
+    const draft: Draft | undefined = parseDraft(val);
+
+    console.log("========");
+    console.log(draft);
+    console.log("========");
     if (draft !== undefined) {
       this.props.onPick(val);
       this.props.onDrafterNameChange(this.state.curDrafterName);

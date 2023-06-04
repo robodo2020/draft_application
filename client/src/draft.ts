@@ -1,10 +1,8 @@
-type countItems = Map<string, number>;
 export type Draft = {
   draftId: number;
-  curDrafterName: string;
   rounds: number;
-  pickedItems: countItems;
-  allOptions: countItems;
+  pickedOptions: string[];
+  allOptions: string[];
 };
 
 export function toList(itemsString: string): string[] {
@@ -31,8 +29,6 @@ export function hasDuplicate(item: string): boolean {
 
 // data sent from backend
 export function parseDraft(val: any): undefined | Draft {
-  console.log(val);
-
   if (typeof val !== "object" || val === null) {
     console.error("not a Draft", val);
     return undefined;
@@ -42,13 +38,8 @@ export function parseDraft(val: any): undefined | Draft {
     return undefined;
   }
 
-  if (!("curDrafterName" in val) || typeof val.curDrafterName !== "string") {
-    console.error("not an object: missing or invalid 'curDrafterName'", val);
-    return undefined;
-  }
-
-  if (!("pickedItems" in val) || typeof val.pickedItems !== "string") {
-    console.error("not an object: missing or invalid 'pickedItems'", val);
+  if (!("pickedOptions" in val) || typeof val.pickedOptions !== "object") {
+    console.error("not an object: missing or invalid 'pickedOptions'", val);
     return undefined;
   }
 
@@ -57,24 +48,17 @@ export function parseDraft(val: any): undefined | Draft {
     return undefined;
   }
 
-  if (!("allOptions" in val) || typeof val.allOptions !== "string") {
+  if (!("allOptions" in val) || typeof val.allOptions !== "object") {
     console.error("not an object: missing or invalid 'allOptions'", val);
     return undefined;
   }
+  // the val contains drafters, but we currently don't need it
+  // Didn't pass the drafters
 
-  const pickedItemsObject = JSON.parse(val.pickedItems);
-  const pickedItems: countItems = new Map(Object.entries(pickedItemsObject));
-
-  const allOptionsObject = JSON.parse(val.allOptions);
-  const allOptions: countItems = new Map(Object.entries(allOptionsObject));
-
-  console.log("at draft.ts");
-  console.log(typeof allOptions);
   return {
     draftId: val.draftId,
-    curDrafterName: val.curDrafterName,
-    pickedItems: pickedItems,
+    pickedOptions: val.pickedOptions,
     rounds: val.rounds,
-    allOptions: allOptions,
+    allOptions: val.allOptions,
   };
 }

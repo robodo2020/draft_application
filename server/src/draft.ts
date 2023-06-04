@@ -84,3 +84,7 @@ export function makeCountDraft(
 ): countDraft {
   return new countDraft(curDrafter, rounds, options, drafters);
 }
+
+// export function makeDraft(rounds: number, AllOptions:string, drafters:string) {
+
+// }
