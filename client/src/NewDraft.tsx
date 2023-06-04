@@ -11,6 +11,7 @@ interface NewDraftState {
   drafters: string; // should it be string[]?
   rounds: number;
   curDrafterName: string;
+  draftId: number;
 }
 
 export class NewDraft extends Component<NewDraftProps, NewDraftState> {
@@ -22,6 +23,7 @@ export class NewDraft extends Component<NewDraftProps, NewDraftState> {
       drafters: "",
       rounds: 1,
       curDrafterName: "",
+      draftId: -1,
     };
   }
 
@@ -119,13 +121,19 @@ export class NewDraft extends Component<NewDraftProps, NewDraftState> {
         encodeURIComponent(this.state.drafters);
       fetch(url, { method: "POST" })
         .then(this.handleAddResponse)
-        // .then(this.props.onPick)
         .catch((err) => {
           this.handleServerError(
             "error happens during creating the new draft",
             err
           );
         });
+      // .then(this.handleRetrieveNextPicker)
+      // .catch((err) => {
+      //   this.handleServerError(
+      //     "error happens during retrieving the next picker",
+      //     err
+      //   );
+      // });
     }
   };
 
@@ -162,10 +170,52 @@ export class NewDraft extends Component<NewDraftProps, NewDraftState> {
     console.log(draft);
     console.log("========");
     if (draft !== undefined) {
-      this.props.onPick(val);
-      this.props.onDrafterNameChange(this.state.curDrafterName);
+      this.setState({ draftId: draft.draftId });
+      this.props.onPick(draft);
+      this.props.onDrafterNameChange(this.state.curDrafterName); // ?
     }
   };
+
+  // handleRetrieveNextPicker = () => {
+  //   const url =
+  //     "/api/picker" + "?draftId=" + encodeURIComponent(this.state.draftId);
+  //   fetch(url, { method: "POST" })
+  //     .then(this.handlePickerResponse)
+  //     .catch((err) => {
+  //       this.handleServerError(
+  //         "error happens during connecting with /picker server",
+  //         err
+  //       );
+  //     });
+  // };
+
+  // handlePickerResponse = (res: Response) => {
+  //   if (res.status === 200) {
+  //     res
+  //       .json()
+  //       .then(this.handlePickerJson)
+  //       .catch((err) => {
+  //         this.handleServerError(
+  //           "error happens when parsing response to Json format",
+  //           err
+  //         );
+  //       });
+  //   } else {
+  //     this.handleServerError("error: Response from /picker is not 200", res);
+  //   }
+  // };
+
+  // handlePickerJson = (val: any) => {
+  //   if (typeof val !== "object" || val === null) {
+  //     console.error("bad data from /add: not a record", val);
+  //     return;
+  //   }
+  //   const nextPicker = val.nextPicker;
+
+  //   if (nextPicker !== undefined) {
+  //    // set something to nextPicker
+  //   }
+  // };
 
   /**
    * handleServerError handles the server error with the customized message

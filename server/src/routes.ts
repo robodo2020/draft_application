@@ -6,6 +6,7 @@ type Draft = {
   allOptions: string[];
   drafters: string[];
   pickedOptions: [string, string][]; // option, drafter
+  pickQueue: string[];
 };
 
 // can we create a global id as draft id?
@@ -38,16 +39,17 @@ export function addDraft(req: Request, res: Response) {
   const draft: Draft = makeDraft(rounds, options, drafters);
 
   DraftMap.set(INITDRAFTID, draft);
-
-  // send data to client side
-
   console.log(DraftMap);
+
+  // const nextPicker = draft.pickQueue.shift();
+  // send data to client side
   res.send({
     draftId: INITDRAFTID,
     pickedOptions: draft.pickedOptions,
     rounds: draft.rounds,
     allOptions: draft.allOptions,
     drafters: draft.drafters,
+    nextPicker: draft.pickQueue[0],
   });
 
   INITDRAFTID++;
@@ -85,6 +87,7 @@ export function loadExistDrafts(req: Request, res: Response) {
     rounds: curDraft.rounds,
     allOptions: curDraft.allOptions,
     drafters: curDraft.drafters,
+    nextPicker: curDraft.pickQueue[0],
   });
 }
 
@@ -121,22 +124,22 @@ export function updateDraft(req: Request, res: Response) {
     return;
   }
   curDraft.allOptions.splice(itemIdx, 1);
+  curDraft.pickQueue.shift();
+
+  let nextPicker: string = "";
+  if (curDraft.pickQueue.length > 0) {
+    nextPicker = curDraft.pickQueue[0];
+  } else {
+    nextPicker = "COMPLETED!!!";
+  }
 
   res.send({
     allOptions: curDraft.allOptions,
     pickedOption: curPickOption,
     curDrafter: curDrafter,
+    nextPicker: nextPicker,
   });
 }
-
-// method to list the chosen options by the input drafter
-export function listChosenOptionsByDrafter() {}
-
-// method for drafter to pick
-export function pickOption() {}
-
-// not sure if needed
-// function switchPickingDrafter() {}
 
 /** Returns a list of all the named save files. */
 export function Dummy(req: Request, res: Response) {
@@ -180,6 +183,13 @@ export function makeDraft(
     allOptions: toList(allOptions),
     drafters: toList(drafters),
     pickedOptions: [],
+    pickQueue: [],
   };
+  for (let i = 0; i < draft.rounds; i++) {
+    for (const drafter of draft.drafters) {
+      draft.pickQueue.push(drafter);
+    }
+  }
+
   return draft;
 }

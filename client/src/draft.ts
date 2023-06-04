@@ -3,6 +3,7 @@ export type Draft = {
   rounds: number;
   pickedOptions: string[];
   allOptions: string[];
+  nextPicker: string;
 };
 
 export function toList(itemsString: string): string[] {
@@ -52,6 +53,11 @@ export function parseDraft(val: any): undefined | Draft {
     console.error("not an object: missing or invalid 'allOptions'", val);
     return undefined;
   }
+
+  if (!("nextPicker" in val) || typeof val.nextPicker !== "string") {
+    console.error("not an object: missing or invalid 'nextPicker'", val);
+    return undefined;
+  }
   // the val contains drafters, but we currently don't need it
   // Didn't pass the drafters
 
@@ -60,5 +66,6 @@ export function parseDraft(val: any): undefined | Draft {
     pickedOptions: val.pickedOptions,
     rounds: val.rounds,
     allOptions: val.allOptions,
+    nextPicker: val.nextPicker,
   };
 }

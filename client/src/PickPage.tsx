@@ -14,8 +14,9 @@ interface PickPageState {
   pickedOptions: JSX.Element[];
   allOptions: JSX.Element[];
   mainDrafter: string;
-
   curPickOption: string;
+  nextPicker: string;
+  completed: boolean;
 }
 
 export class PickPage extends Component<PickPageProps, PickPageState> {
@@ -26,10 +27,13 @@ export class PickPage extends Component<PickPageProps, PickPageState> {
       pickedOptions: [],
       mainDrafter: this.props.curDrafterName,
       allOptions: [],
-      curPickOption: "",
+      curPickOption: this.props.initialDraft.allOptions[0],
+      nextPicker: this.props.initialDraft.nextPicker,
+      completed: false,
     };
 
-    // this all the  unpicked options
+    // this all the unpicked options
+
     for (const option of this.props.initialDraft.allOptions) {
       this.state.allOptions.push(<option>{option}</option>);
     }
@@ -47,12 +51,10 @@ export class PickPage extends Component<PickPageProps, PickPageState> {
   }
 
   render = (): JSX.Element => {
-    const youPick: boolean =
-      this.props.curDrafterName === this.state.mainDrafter;
-    const otherPick: boolean =
-      this.props.curDrafterName !== this.state.mainDrafter;
+    const canCurDrafterPick: boolean =
+      this.state.nextPicker === this.state.mainDrafter;
 
-    console.log(this.state.allOptions);
+    // console.log(this.state.allOptions);
 
     return (
       <div>
@@ -69,21 +71,13 @@ export class PickPage extends Component<PickPageProps, PickPageState> {
                 <th>Drater</th>
               </tr>
             </thead>
-            <tbody>
-              {this.state.pickedOptions}
-              {/* {data.map((item, index) => (
-          <tr key={index}>
-            <td>{item.name}</td>
-            <td>{item.age}</td>
-          </tr>
-        ))} */}
-            </tbody>
+            <tbody>{this.state.pickedOptions}</tbody>
           </table>
         </div>
 
         {/* show who's turn & the options */}
         {/* if your turn, show the select option and save (draft) button */}
-        {youPick && (
+        {canCurDrafterPick && !this.state.completed && (
           <div>
             <p>It's your pick</p>
             <select onChange={this.handlePickChange}>
@@ -94,14 +88,15 @@ export class PickPage extends Component<PickPageProps, PickPageState> {
             </button>
           </div>
         )}
-        {otherPick && (
+        {!canCurDrafterPick && !this.state.completed && (
           <div>
-            <p>Waiting for {this.props.curDrafterName} to pick.</p>
+            <p>Waiting for {this.state.nextPicker} to pick.</p>
             <button>refresh</button>
           </div>
         )}
 
         {/* if complete, show it is complete */}
+        {this.state.completed && <p>Draft is complete.</p>}
       </div>
     );
   };
@@ -125,7 +120,7 @@ export class PickPage extends Component<PickPageProps, PickPageState> {
       "&curDrafter=" +
       this.state.mainDrafter;
     fetch(url, { method: "POST" })
-      .then(this.handleUpdateAllOption)
+      .then(this.handleUpdateDraft)
       .catch((err) => {
         this.handleServerError(
           "error happens during creating the new draft",
@@ -136,7 +131,7 @@ export class PickPage extends Component<PickPageProps, PickPageState> {
 
     // 3. set the props curDrafter to next person in queue.
   };
-  handleUpdateAllOption = (res: Response) => {
+  handleUpdateDraft = (res: Response) => {
     if (res.status === 200) {
       res
         .json()
@@ -172,12 +167,31 @@ export class PickPage extends Component<PickPageProps, PickPageState> {
       console.error("not an object: missing or invalid 'curDrafter'", val);
       return;
     }
+    if (!("nextPicker" in val) || typeof val.nextPicker !== "string") {
+      console.error("not an object: missing or invalid 'nextPicker'", val);
+      return;
+    }
 
     console.log(val);
 
     // const draft: Draft | undefined = parseDraft(val);
     const updatedAllOptions = val.allOptions;
+    if (updatedAllOptions === undefined) {
+      console.error("bad data of 'allOptions' from response", val);
+      return;
+    }
     const updatePickedOption = val.pickedOption;
+    if (updatePickedOption === undefined) {
+      console.error("bad data of 'pickedOption' from response", val);
+      return;
+    }
+
+    const nextPicker = val.nextPicker;
+    if (nextPicker === undefined) {
+      console.error("bad data of 'nextPicker' from response", val);
+      return;
+    }
+
     const updatePickedOptions: JSX.Element[] = [...this.state.pickedOptions];
 
     updatePickedOptions.push(
@@ -191,6 +205,11 @@ export class PickPage extends Component<PickPageProps, PickPageState> {
 
     this.setState({ allOptions: updatedAllOptions });
     this.setState({ pickedOptions: updatePickedOptions });
+    if (nextPicker === "COMPLETED!!!") {
+      this.setState({ nextPicker: "", completed: true });
+    } else {
+      this.setState({ nextPicker: nextPicker });
+    }
   };
 
   /**

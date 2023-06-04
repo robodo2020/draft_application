@@ -46,9 +46,9 @@ export class App extends Component<{}, AppState> {
   handlePick = (draft: Draft): void => {
     this.setState({ page: { kind: "pick", draft: draft } });
 
-    console.log("typeof draft.allOptions");
-    console.log(typeof draft.allOptions);
-    console.log("typeof draft.allOptions");
+    console.log("----------- draft -----------");
+    console.log(draft);
+    console.log("----------- draft -----------");
   };
   handleDrafterNameChange = (curDrafterName: string): void => {
     this.setState({ curDrafterName: curDrafterName });
