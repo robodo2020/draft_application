@@ -1,14 +1,14 @@
 import React, { Component, ChangeEvent, MouseEvent } from "react";
-// import { Draft } from "./draft";
+import { parseDraft, Draft } from "./draft";
 
 interface ExistedProps {
-  // onPick: (draft: Draft) => void;
-  // onPick: () => void;
+  onPick: (draft: Draft) => void;
+  onDrafterNameChange: (curDrafterName: string) => void;
 }
 
 interface ExistedState {
   curDrafterName: string;
-  draftId: string;
+  draftId: number;
 }
 
 export class ExistedDraft extends Component<ExistedProps, ExistedState> {
@@ -17,7 +17,7 @@ export class ExistedDraft extends Component<ExistedProps, ExistedState> {
 
     this.state = {
       curDrafterName: "",
-      draftId: "",
+      draftId: 0,
     };
   }
 
@@ -31,7 +31,7 @@ export class ExistedDraft extends Component<ExistedProps, ExistedState> {
             id="name"
             type="text"
             value={this.state.curDrafterName}
-            onChange={this.handleCurDrafterChange}
+            onChange={this.handleCurDrafterNameChange}
           ></input>
         </div>
 
@@ -52,43 +52,36 @@ export class ExistedDraft extends Component<ExistedProps, ExistedState> {
     );
   };
 
-  handleCurDrafterChange = (evt: ChangeEvent<HTMLInputElement>): void => {
+  handleCurDrafterNameChange = (evt: ChangeEvent<HTMLInputElement>): void => {
     this.setState({ curDrafterName: evt.target.value });
   };
   handledraftId = (evt: ChangeEvent<HTMLInputElement>): void => {
-    this.setState({ draftId: evt.target.value });
+    this.setState({ draftId: parseInt(evt.target.value) });
   };
 
-  // TODO: join the exist draft
   handleJoinExist = (_: MouseEvent<HTMLButtonElement>): void => {
-    const url = "/api/list";
-
-    // const url =
-    //   "/api/list" +
-    //   "?curDrafterName=" +
-    //   encodeURIComponent(this.state.curDrafterName) +
-    //   "&draftId=" +
-    //   encodeURIComponent(this.state.draftId);
+    const url =
+      "/api/load" +
+      "?curDrafterName=" +
+      encodeURIComponent(this.state.curDrafterName) +
+      "&draftId=" +
+      encodeURIComponent(this.state.draftId);
 
     fetch(url, { method: "GET" })
-      .then(this.handleExistDraft)
+      .then(this.handleGetExistDraft)
       // .then(this.props.onPick)
       .catch((err) => {
         this.handleServerError(
-          "error happens during joining existing draft",
+          "error happens during retrieving existing draft",
           err
         );
       });
   };
-  handleExistDraft = (res: Response): void => {
-    console.log("---------");
-    console.log(res); // the draft data send from backend
-    console.log("---------");
+  handleGetExistDraft = (res: Response): void => {
     if (res.status === 200) {
-      console.log(res.json);
       res
         .json()
-        .then(this.handleJoinExistDraft)
+        .then(this.handleGetExistDraftJson)
         .catch(() =>
           this.handleServerError(
             "error happens when parsing the draft result",
@@ -103,22 +96,19 @@ export class ExistedDraft extends Component<ExistedProps, ExistedState> {
     }
   };
 
-  handleJoinExistDraft = (val: any): void => {
-    console.log(val);
-    if (val === null) {
-      console.error("bad data from /list: no draft data", val);
+  handleGetExistDraftJson = (val: any): void => {
+    if (typeof val !== "object" || val === null) {
+      console.error("bad data from /load: not a record", val);
       return;
     }
 
-    // console.log()
+    const draft = parseDraft(val);
 
-    // const square: Square = fromJson(val);
-    // console.log(square);
-    // if (square === undefined) {
-    //   this.handleServerError("loaded square is undefined", val);
-    // }
-
-    // this.props.onShow(square, this.state.selectedFileName); // pass the square to app
+    if (draft !== undefined) {
+      this.props.onPick(val);
+      this.props.onDrafterNameChange(this.state.curDrafterName);
+      console.log(typeof draft.allOptions);
+    }
   };
 
   /**

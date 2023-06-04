@@ -68,6 +68,8 @@ export function parseDraft(val: any): undefined | Draft {
   const allOptionsObject = JSON.parse(val.allOptions);
   const allOptions: countItems = new Map(Object.entries(allOptionsObject));
 
+  console.log("at draft.ts");
+  console.log(typeof allOptions);
   return {
     draftId: val.draftId,
     curDrafterName: val.curDrafterName,

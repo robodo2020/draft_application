@@ -3,6 +3,7 @@ import React, { Component, MouseEvent, ChangeEvent } from "react";
 import { Draft, parseDraft, hasDuplicate } from "./draft";
 interface NewDraftProps {
   onPick: (draft: Draft) => void;
+  onDrafterNameChange: (curDrafterName: string) => void;
 }
 
 interface NewDraftState {
@@ -34,7 +35,7 @@ export class NewDraft extends Component<NewDraftProps, NewDraftState> {
             id="name"
             type="text"
             value={this.state.curDrafterName}
-            onChange={this.handleCurDrafterChange}
+            onChange={this.handleCurDrafterNameChange}
           ></input>
         </div>
         <label htmlFor="rounds">Rounds: </label>
@@ -77,7 +78,7 @@ export class NewDraft extends Component<NewDraftProps, NewDraftState> {
     );
   };
 
-  handleCurDrafterChange = (evt: ChangeEvent<HTMLInputElement>): void => {
+  handleCurDrafterNameChange = (evt: ChangeEvent<HTMLInputElement>): void => {
     this.setState({ curDrafterName: evt.target.value });
   };
 
@@ -151,12 +152,12 @@ export class NewDraft extends Component<NewDraftProps, NewDraftState> {
       return;
     }
 
-    console.log("check point0");
     console.log(val);
 
     const draft = parseDraft(val);
     if (draft !== undefined) {
       this.props.onPick(val);
+      this.props.onDrafterNameChange(this.state.curDrafterName);
     }
   };
 

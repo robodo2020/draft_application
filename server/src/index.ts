@@ -7,6 +7,6 @@ const port = 8088;
 const app = express();
 app.use(bodyParser.json());
 app.get("/api/dummy", Dummy);
-app.get("api/list", loadExistDrafts);
+app.get("/api/load", loadExistDrafts);
 app.post("/api/add", addDraft);
 app.listen(port, () => console.log(`Server listening on ${port}`));

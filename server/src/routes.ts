@@ -22,12 +22,14 @@ export function addDraft(req: Request, res: Response) {
 
   const options = req.query.options;
   if (options === undefined || typeof options !== "string") {
+    console.log(options);
     res.status(400).send("missing 'options' parameter");
     return;
   }
 
   const drafters = req.query.drafters;
   if (drafters === undefined || typeof drafters !== "string") {
+    console.log(drafters);
     res.status(400).send("missing 'drafters' parameter");
     return;
   }
@@ -67,42 +69,54 @@ export function addDraft(req: Request, res: Response) {
 
 // load the exists drafts
 // export function loadExistDrafts(req: Request, res: Response) {
-export function loadExistDrafts(_: Request, res: Response) {
-  res.send({ d: DraftMap });
+export function loadExistDrafts(req: Request, res: Response) {
+  console.log("testtesttest");
+  const curDrafterName = req.query.curDrafterName;
+  if (curDrafterName === undefined || typeof curDrafterName !== "string") {
+    res.status(400).send("missing 'curDrafter' parameter");
+    return;
+  }
+  const draftIdStr = req.query.draftId;
 
-  // console.log("testtesttest");
-  // const draftIdStr = req.query.draftId;
+  if (draftIdStr === undefined || typeof draftIdStr !== "string") {
+    res.status(400).send("missing 'draftId' parameter");
+    return;
+  }
+  const draftId = parseInt(draftIdStr);
 
-  // if (draftIdStr === undefined || typeof draftIdStr !== "string") {
-  //   res.status(400).send("missing 'draftId' parameter");
-  //   return;
-  // }
-  // const draftId = parseInt(draftIdStr);
+  // check if curDrafter exist in map
+  // currently assume id definitely exists
+  // currently assume curDrafter definitely exists
+  const curDraft = DraftMap.get(draftId);
+  if (curDraft === undefined) {
+    res.status(400).send("draftId doesn't exist");
+    return;
+  }
+  // TODO: might affect due to this line is get method
+  curDraft.curDrafterName = curDrafterName;
 
-  // const curDrafterName = req.query.curDrafterName;
-  // if (curDrafterName === undefined || typeof curDrafterName !== "string") {
-  //   res.status(400).send("missing 'curDrafter' parameter");
-  //   return;
-  // }
+  const selectedOptions = curDraft.drafters.get(curDraft.curDrafterName);
+  if (selectedOptions === undefined) {
+    res.status(400).send("drafter name doesn't exist in this draft");
+    return;
+  }
 
-  // // check if curDrafter exist in map
+  // make it Jsonize
+  const allOptionsObject = Object.fromEntries(curDraft.options);
+  const allOptionsJson = JSON.stringify(allOptionsObject);
 
-  // // currently assume id definitely exists
-  // // currently assume curDrafter definitely exists
-  // const curDraft = DraftMap.get(draftId);
-  // if (curDraft === undefined) {
-  //   res.status(400).send("draftId doesn't exist");
-  //   return;
-  // }
+  const selectedOptionsObject = Object.fromEntries(selectedOptions);
+  const selectedOptionsJson = JSON.stringify(selectedOptionsObject);
 
-  // if (!curDraft.drafters.has(curDrafterName)) {
-  //   res.status(400).send("drafter name doesn't exist");
-  //   return;
-  // }
+  console.log(curDraft);
 
-  // curDraft.curDrafter = curDrafterName;
-  // console.log(curDraft);
-  // res.send(curDraft);
+  res.send({
+    draftId: draftId,
+    curDrafterName: curDrafterName,
+    pickedItems: selectedOptionsJson,
+    rounds: curDraft.rounds, // TODO: maybe need to send curRound record
+    allOptions: allOptionsJson,
+  });
 }
 
 // method to list the chosen options by the input drafter

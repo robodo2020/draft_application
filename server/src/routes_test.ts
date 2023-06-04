@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import * as httpMocks from "node-mocks-http";
-import { Dummy, loadExistDrafts } from "./routes";
+import { Dummy, loadExistDrafts, addDraft } from "./routes";
 // import { countDraft, makeSimpleDraft } from "./draft";
 
 describe("routes", function () {
@@ -17,12 +17,48 @@ describe("routes", function () {
   });
 
   it("end-to-end", function () {
-    const req1 = httpMocks.createRequest({ method: "GET", url: "/api/list" });
+    const req1 = httpMocks.createRequest({
+      method: "POST",
+      url: "/api/add",
+      query: {
+        curDrafterName: "ab",
+        rounds: "0",
+        options: "a\nb\nc\nd",
+        drafters: "ab\nbc\ncd\nde",
+      },
+    });
     const res1 = httpMocks.createResponse();
-    loadExistDrafts(req1, res1);
+    addDraft(req1, res1);
 
     // const map1 = makeSimpleDraft("", 1, "", "");
-    // assert.strictEqual(res1._getStatusCode(), 200);
-    // assert.deepStrictEqual(res1._getData(), { d: map1 });
+    assert.strictEqual(res1._getStatusCode(), 200);
+    assert.deepStrictEqual(res1._getData(), {
+      draftId: 0,
+      curDrafterName: "ab",
+      pickedItems: "{}",
+      rounds: 0,
+      allOptions: '{"a":1,"b":1,"c":1,"d":1}',
+    });
+
+    const req2 = httpMocks.createRequest({
+      method: "GET",
+      url: "/api/load",
+      query: {
+        curDrafterName: "bc",
+        draftId: "0",
+      },
+    });
+    const res2 = httpMocks.createResponse();
+
+    loadExistDrafts(req2, res2);
+    assert.strictEqual(res2._getStatusCode(), 200);
+    const data2 = res2._getData();
+    assert.deepStrictEqual(data2, {
+      draftId: 0,
+      curDrafterName: "bc",
+      pickedItems: "{}",
+      rounds: 0,
+      allOptions: '{"a":1,"b":1,"c":1,"d":1}',
+    });
   });
 });
