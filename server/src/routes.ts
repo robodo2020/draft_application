@@ -88,13 +88,20 @@ export function loadExistDrafts(req: Request, res: Response) {
 
   console.log(curDraft);
 
+  let nextPicker: string = "";
+  if (curDraft.pickQueue.length > 0) {
+    nextPicker = curDraft.pickQueue[0];
+  } else {
+    nextPicker = "COMPLETED!!!";
+  }
+
   res.send({
     draftId: draftId,
     pickedOptions: curDraft.pickedOptions,
     rounds: curDraft.rounds,
     allOptions: curDraft.allOptions,
     drafters: curDraft.drafters,
-    nextPicker: curDraft.pickQueue[0],
+    nextPicker: nextPicker,
   });
 }
 

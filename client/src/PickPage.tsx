@@ -1,5 +1,5 @@
 import React, { Component, MouseEvent, ChangeEvent } from "react";
-import { Draft } from "./draft";
+import { Draft, parseDraft } from "./draft";
 
 /**
  * PickPageProps is the props that send data from parent component, which is app
@@ -45,7 +45,7 @@ export class PickPage extends Component<PickPageProps, PickPageState> {
 
     // this all the unpicked options
     for (const option of this.props.initialDraft.allOptions) {
-      this.state.allOptions.push(<option>{option}</option>);
+      this.state.allOptions.push(<option key={option}>{option}</option>);
     }
 
     // list the already picked options
@@ -62,6 +62,8 @@ export class PickPage extends Component<PickPageProps, PickPageState> {
   render = (): JSX.Element => {
     const canCurDrafterPick: boolean =
       this.state.nextPicker === this.state.mainDrafter;
+
+    this.updatePicker(this.state.nextPicker);
 
     return (
       <div>
@@ -97,7 +99,9 @@ export class PickPage extends Component<PickPageProps, PickPageState> {
         {!canCurDrafterPick && !this.state.completed && (
           <div>
             <p>Waiting for {this.state.nextPicker} to pick.</p>
-            <button>refresh</button>
+            <button type="button" onClick={this.handleRefresh}>
+              refresh
+            </button>
           </div>
         )}
 
@@ -105,6 +109,87 @@ export class PickPage extends Component<PickPageProps, PickPageState> {
         {this.state.completed && <p>Draft is complete.</p>}
       </div>
     );
+  };
+
+  /** handleRefresh refresh the pick page to the latest picking status */
+  handleRefresh = () => {
+    const url =
+      "/api/load" +
+      "?curDrafterName=" +
+      encodeURIComponent(this.state.mainDrafter) +
+      "&draftId=" +
+      encodeURIComponent(this.props.initialDraft.draftId);
+
+    fetch(url, { method: "GET" })
+      .then(this.handleGetExistDraft)
+      .catch((err) => {
+        this.handleServerError(
+          "error happens during retrieving existing draft",
+          err
+        );
+      });
+  };
+
+  /** handleGetExistDraft converts the draft raw data to Json format */
+  handleGetExistDraft = (res: Response): void => {
+    if (res.status === 200) {
+      res
+        .json()
+        .then(this.handleGetExistDraftJson)
+        .catch(() =>
+          this.handleServerError(
+            "error happens when parsing the draft result",
+            res
+          )
+        );
+    } else {
+      this.handleServerError(
+        "error happens on handling join during response to server",
+        res
+      );
+    }
+  };
+
+  /** handleGetExistDraftJson parse the Json data to draft object */
+  handleGetExistDraftJson = (val: any): void => {
+    if (typeof val !== "object" || val === null) {
+      console.error("bad data from /load: not a record", val);
+      return;
+    }
+    const draft = parseDraft(val);
+
+    if (draft !== undefined) {
+      this.updateState(draft);
+    }
+  };
+
+  /** updateState supports refresh the PickPage with the latest picking status */
+  updateState = (draft: Draft): void => {
+    // update all option
+    const updateAllOption: JSX.Element[] = [];
+
+    for (const option of draft.allOptions) {
+      updateAllOption.push(<option key={option}>{option}</option>);
+    }
+
+    // update picked option
+    const updatepickedOption: JSX.Element[] = [];
+    for (const [option, drafter] of draft.pickedOptions) {
+      updatepickedOption.push(
+        <tr>
+          <td>{option}</td>
+          <td>{drafter}</td>
+        </tr>
+      );
+    }
+
+    this.setState({
+      allOptions: updateAllOption,
+      pickedOptions: updatepickedOption,
+      curPickOption: draft.allOptions[0],
+    });
+    // update next picker
+    this.updatePicker(draft.nextPicker);
   };
 
   /** handlePickChange suports for changing the pick option */
@@ -212,6 +297,10 @@ export class PickPage extends Component<PickPageProps, PickPageState> {
 
     this.setState({ allOptions: updatedAllOptions });
     this.setState({ pickedOptions: updatePickedOptions });
+    this.updatePicker(nextPicker);
+  };
+
+  updatePicker = (nextPicker: string) => {
     if (nextPicker === "COMPLETED!!!") {
       this.setState({ nextPicker: "", completed: true });
     } else {
