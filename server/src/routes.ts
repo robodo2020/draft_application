@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-// import { countDraft } from "./draft";
 
 type Draft = {
   rounds: number;
@@ -9,12 +8,16 @@ type Draft = {
   pickQueue: string[];
 };
 
-// can we create a global id as draft id?
 let INITDRAFTID: number = 0;
 
 // DraftMap is the main database to store all the Draft Information
 const DraftMap: Map<number, Draft> = new Map();
 
+/**
+ * addDraft stores the request draft data to server
+ * @param req the request draft that requires rounds, options, drafters information
+ * @param res the organized draft information
+ */
 export function addDraft(req: Request, res: Response) {
   const rounds = req.query.rounds;
   if (rounds === undefined || typeof rounds !== "string") {
@@ -41,7 +44,6 @@ export function addDraft(req: Request, res: Response) {
   DraftMap.set(INITDRAFTID, draft);
   console.log(DraftMap);
 
-  // const nextPicker = draft.pickQueue.shift();
   // send data to client side
   res.send({
     draftId: INITDRAFTID,
@@ -56,7 +58,12 @@ export function addDraft(req: Request, res: Response) {
 }
 
 // load the exists drafts
-// export function loadExistDrafts(req: Request, res: Response) {
+/**
+ * loadExistDrafts will load the existed drafts in the server and send it to client
+ * @param req the reuqest that needs current Drafter Name and the draft Id
+ * @param res the response that returns exists draft information
+ * @requires draftId exists in map
+ */
 export function loadExistDrafts(req: Request, res: Response) {
   const curDrafterName = req.query.curDrafterName;
   if (curDrafterName === undefined || typeof curDrafterName !== "string") {
@@ -91,6 +98,12 @@ export function loadExistDrafts(req: Request, res: Response) {
   });
 }
 
+/**
+ * updateDraft operates the draft when a drafter pick an item
+ * @param req require request that needs the picked Option, draftId, current drafter
+ * @param res
+ * @requires picked Option is existed in the draft all options
+ */
 export function updateDraft(req: Request, res: Response) {
   const curPickOption = req.query.curPickOption;
   if (curPickOption === undefined || typeof curPickOption !== "string") {

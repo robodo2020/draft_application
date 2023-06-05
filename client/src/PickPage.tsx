@@ -1,16 +1,26 @@
 import React, { Component, MouseEvent, ChangeEvent } from "react";
 import { Draft } from "./draft";
+
+/**
+ * PickPageProps is the props that send data from parent component, which is app
+ * @param initialDraft the draft data to interact with
+ * @param curDrafterName the user input drafter name
+ */
 interface PickPageProps {
-  // onPick: (draft: Draft) => void;
   initialDraft: Draft;
   curDrafterName: string;
 }
 
+/**
+ * PickPageState is the state of the pick page component
+ * @param pickedOptions the options that already picked
+ * @param allOptions all the options to be picked
+ * @param mainDrafter the current operating drafter
+ * @param curPickOption the current user picked option
+ * @param nextPicker the picker who can pick the option
+ * @param completed the parameter to shows that this draft is completed
+ */
 interface PickPageState {
-  // options: string; // should it be string[]?
-  // drafters: string; // should it be string[]?
-  // rounds: number;
-  // curDrafterName: string;
   pickedOptions: JSX.Element[];
   allOptions: JSX.Element[];
   mainDrafter: string;
@@ -19,6 +29,7 @@ interface PickPageState {
   completed: boolean;
 }
 
+/** PickPage is the component to show the pick page */
 export class PickPage extends Component<PickPageProps, PickPageState> {
   constructor(props: PickPageProps) {
     super(props);
@@ -33,14 +44,12 @@ export class PickPage extends Component<PickPageProps, PickPageState> {
     };
 
     // this all the unpicked options
-
     for (const option of this.props.initialDraft.allOptions) {
       this.state.allOptions.push(<option>{option}</option>);
     }
 
     // list the already picked options
     for (const [option, drafter] of this.props.initialDraft.pickedOptions) {
-      // change to table
       this.state.pickedOptions.push(
         <tr>
           <td>{option}</td>
@@ -54,11 +63,8 @@ export class PickPage extends Component<PickPageProps, PickPageState> {
     const canCurDrafterPick: boolean =
       this.state.nextPicker === this.state.mainDrafter;
 
-    // console.log(this.state.allOptions);
-
     return (
       <div>
-        {/* need an varible to show the draft id */}
         <h1>Status of Draft "{this.props.initialDraft.draftId}"</h1>
 
         {/* place to show the overall picked items (what item, who picked) */}
@@ -101,6 +107,7 @@ export class PickPage extends Component<PickPageProps, PickPageState> {
     );
   };
 
+  /** handlePickChange suports for changing the pick option */
   handlePickChange = (event: ChangeEvent<HTMLSelectElement>): void => {
     const curPickOption = event.target.value;
     if (curPickOption !== undefined) {
@@ -108,11 +115,12 @@ export class PickPage extends Component<PickPageProps, PickPageState> {
     }
   };
 
+  /** handleSave connects with server to update the status of the current draft */
   handleSave = (evt: MouseEvent<HTMLButtonElement>): void => {
     evt.preventDefault();
     // 1. push a save with the picked option and curDrafter into pickedOptions; remove the item in allOption, in backend,
     const url =
-      "api/save" +
+      "api/update" +
       "?curPickOption=" +
       this.state.curPickOption +
       "&draftId=" +
@@ -127,10 +135,9 @@ export class PickPage extends Component<PickPageProps, PickPageState> {
           err
         );
       });
-    // 2. update the state's pickOption & allOption
-
-    // 3. set the props curDrafter to next person in queue.
   };
+
+  /**  receive the updated data after creating new draft, and will converts to Json format   */
   handleUpdateDraft = (res: Response) => {
     if (res.status === 200) {
       res
@@ -147,6 +154,7 @@ export class PickPage extends Component<PickPageProps, PickPageState> {
     }
   };
 
+  /** handleUpdateJson update the state's pickOption & allOption and set the props of next picker. */
   handleUpdateJson = (val: any) => {
     if (typeof val !== "object" || val === null) {
       console.error("bad data from /update: not a record", val);
@@ -174,7 +182,6 @@ export class PickPage extends Component<PickPageProps, PickPageState> {
 
     console.log(val);
 
-    // const draft: Draft | undefined = parseDraft(val);
     const updatedAllOptions = val.allOptions;
     if (updatedAllOptions === undefined) {
       console.error("bad data of 'allOptions' from response", val);

@@ -6,6 +6,12 @@ export type Draft = {
   nextPicker: string;
 };
 
+/**
+ * toList helps to turns is a string to list of string
+ * @param itemsString the input string to be transformed
+ * @requires string separated by "\n"
+ * @returns list of string
+ */
 export function toList(itemsString: string): string[] {
   const itemsList: string[] = itemsString
     .split("\n")
@@ -15,6 +21,11 @@ export function toList(itemsString: string): string[] {
   return itemsList;
 }
 
+/**
+ * hasDuplicate will check whether input string has duplicate item
+ * @param item  the input string that will use toList to turn to list of string, then check if there's duplicate
+ * @returns boolean that true is has duplicate, false is doesn't have duplicate
+ */
 export function hasDuplicate(item: string): boolean {
   const itemsList: string[] = toList(item);
   const set: Set<string> = new Set();
@@ -28,7 +39,12 @@ export function hasDuplicate(item: string): boolean {
   return false;
 }
 
-// data sent from backend
+/**
+ * parseDraft supports to convert the draft data sent from server side, organized and return as Draft object
+ * @param val the input data that sent from server side
+ * @requires val should have parameters of draftId, pickedOptions, rounds, allOptions, and nextPicker
+ * @returns the organized Draft object
+ */
 export function parseDraft(val: any): undefined | Draft {
   if (typeof val !== "object" || val === null) {
     console.error("not a Draft", val);

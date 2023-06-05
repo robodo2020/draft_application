@@ -1,19 +1,37 @@
 import React, { Component, MouseEvent, ChangeEvent } from "react";
-// import { makeSimpleDraft, simpleDraft } from "./simpleDraft";
 import { Draft, parseDraft, hasDuplicate } from "./draft";
+
 interface NewDraftProps {
+  /**
+   * onPick pass the draft object to app, in order to be passed to PickPage
+   * @param draft the Draft object that will operate the pick item in PickPage
+   */
   onPick: (draft: Draft) => void;
+
+  /**
+   * onDrafterNameChange supports for changing the name in the drafter name input block
+   * @param curDrafterName the user input drafter name
+   */
   onDrafterNameChange: (curDrafterName: string) => void;
 }
 
+/**
+ * NewDraftState stores the state of the NewDraft component
+ * @param options the user input options
+ * @param drafters the user input of all drafters
+ * @param rounds the user input rounds
+ * @param curDrafterName the user input current drafter name to operate pick
+ * @param draftId the draft Id sent from server side
+ */
 interface NewDraftState {
-  options: string; // should it be string[]?
-  drafters: string; // should it be string[]?
+  options: string;
+  drafters: string;
   rounds: number;
   curDrafterName: string;
   draftId: number;
 }
 
+/** NewDraft is the component that shows all information of New Draft elements */
 export class NewDraft extends Component<NewDraftProps, NewDraftState> {
   constructor(props: NewDraftProps) {
     super(props);
@@ -80,30 +98,37 @@ export class NewDraft extends Component<NewDraftProps, NewDraftState> {
     );
   };
 
+  /** handleCurDrafterNameChange suports for changing the current drafter name */
   handleCurDrafterNameChange = (evt: ChangeEvent<HTMLInputElement>): void => {
     this.setState({ curDrafterName: evt.target.value });
   };
 
+  /** handleCurDrafterNameChange suports for changing the define rounds */
   handleRoundChange = (evt: ChangeEvent<HTMLInputElement>): void => {
     this.setState({ rounds: parseInt(evt.target.value) });
   };
 
+  /**
+   * handleOptionsChange suports for changing the define all options
+   * @requires option cannot be "COMPLETED!!!"
+   */
   handleOptionsChange = (evt: ChangeEvent<HTMLTextAreaElement>): void => {
     this.setState({ options: evt.target.value });
   };
 
+  /** handleDraftersChange suports for changing all the drafters */
   handleDraftersChange = (evt: ChangeEvent<HTMLTextAreaElement>): void => {
     this.setState({ drafters: evt.target.value });
   };
 
+  /** handleAdd connects with server to create a new draft and store it*/
   handleAdd = (_: MouseEvent<HTMLButtonElement>): void => {
     if (
       this.state.rounds > 0 &&
       this.state.options.length > 0 &&
       this.state.drafters.length > 0
     ) {
-      // organize the data first, then send to backend
-      // check drafter no duplicate
+      // organize the data first, then send to backend and check drafter no duplicate
       if (hasDuplicate(this.state.drafters)) {
         console.error("drafter cannot put duplicate item");
         return;
@@ -127,17 +152,10 @@ export class NewDraft extends Component<NewDraftProps, NewDraftState> {
             err
           );
         });
-      // .then(this.handleRetrieveNextPicker)
-      // .catch((err) => {
-      //   this.handleServerError(
-      //     "error happens during retrieving the next picker",
-      //     err
-      //   );
-      // });
     }
   };
 
-  // the reason need this is because use this data for picking
+  /** handleAddResponse receive the created draft raw data for PickPage uses, and will converts to Json format */
   handleAddResponse = (res: Response) => {
     console.log(res);
     if (res.status === 200) {
@@ -155,7 +173,7 @@ export class NewDraft extends Component<NewDraftProps, NewDraftState> {
     }
   };
 
-  // the data sent from backend side
+  /** handleAddJson parse the Json data to draft object */
   handleAddJson = (val: any) => {
     if (typeof val !== "object" || val === null) {
       console.error("bad data from /add: not a record", val);
@@ -175,47 +193,6 @@ export class NewDraft extends Component<NewDraftProps, NewDraftState> {
       this.props.onDrafterNameChange(this.state.curDrafterName); // ?
     }
   };
-
-  // handleRetrieveNextPicker = () => {
-  //   const url =
-  //     "/api/picker" + "?draftId=" + encodeURIComponent(this.state.draftId);
-  //   fetch(url, { method: "POST" })
-  //     .then(this.handlePickerResponse)
-  //     .catch((err) => {
-  //       this.handleServerError(
-  //         "error happens during connecting with /picker server",
-  //         err
-  //       );
-  //     });
-  // };
-
-  // handlePickerResponse = (res: Response) => {
-  //   if (res.status === 200) {
-  //     res
-  //       .json()
-  //       .then(this.handlePickerJson)
-  //       .catch((err) => {
-  //         this.handleServerError(
-  //           "error happens when parsing response to Json format",
-  //           err
-  //         );
-  //       });
-  //   } else {
-  //     this.handleServerError("error: Response from /picker is not 200", res);
-  //   }
-  // };
-
-  // handlePickerJson = (val: any) => {
-  //   if (typeof val !== "object" || val === null) {
-  //     console.error("bad data from /add: not a record", val);
-  //     return;
-  //   }
-  //   const nextPicker = val.nextPicker;
-
-  //   if (nextPicker !== undefined) {
-  //    // set something to nextPicker
-  //   }
-  // };
 
   /**
    * handleServerError handles the server error with the customized message

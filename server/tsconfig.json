@@ -18,9 +18,5 @@
     "inlineSourceMap": true,
     "downlevelIteration": true
   },
-  "include": [
-    "src/**/*",
-    "../client/src/draft_test.ts",
-    "../client/src/draft_test.ts"
-  ]
+  "include": ["src/**/*"]
 }

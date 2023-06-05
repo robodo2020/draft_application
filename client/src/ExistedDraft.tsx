@@ -2,15 +2,30 @@ import React, { Component, ChangeEvent, MouseEvent } from "react";
 import { parseDraft, Draft } from "./draft";
 
 interface ExistedProps {
+  /**
+   * onPick pass the draft object to app, in order to be passed to PickPage
+   * @param draft the Draft object that will operate the pick item in PickPage
+   */
   onPick: (draft: Draft) => void;
+
+  /**
+   * onDrafterNameChange supports for changing the name in the drafter name input block
+   * @param curDrafterName the user input drafter name
+   */
   onDrafterNameChange: (curDrafterName: string) => void;
 }
 
+/**
+ * ExistedState stores the state of the ExistedDraft component
+ * @param curDrafterName the current drafter name
+ * @param draftId the Id of the draft from server side
+ */
 interface ExistedState {
   curDrafterName: string;
   draftId: number;
 }
 
+/** ExistedDraft is the component that joins the exist page to operate */
 export class ExistedDraft extends Component<ExistedProps, ExistedState> {
   constructor(props: ExistedProps) {
     super(props);
@@ -52,13 +67,17 @@ export class ExistedDraft extends Component<ExistedProps, ExistedState> {
     );
   };
 
+  /** handleCurDrafterNameChange suports for change the current drafter name */
   handleCurDrafterNameChange = (evt: ChangeEvent<HTMLInputElement>): void => {
     this.setState({ curDrafterName: evt.target.value });
   };
+
+  /** handledraftId supports for changing the draft Id by user input  */
   handledraftId = (evt: ChangeEvent<HTMLInputElement>): void => {
     this.setState({ draftId: parseInt(evt.target.value) });
   };
 
+  /** handleJoinExist connects with server to retrieve the draft raw data */
   handleJoinExist = (_: MouseEvent<HTMLButtonElement>): void => {
     const url =
       "/api/load" +
@@ -76,6 +95,8 @@ export class ExistedDraft extends Component<ExistedProps, ExistedState> {
         );
       });
   };
+
+  /** handleGetExistDraft converts the draft raw data to Json format */
   handleGetExistDraft = (res: Response): void => {
     if (res.status === 200) {
       res
@@ -95,6 +116,7 @@ export class ExistedDraft extends Component<ExistedProps, ExistedState> {
     }
   };
 
+  /** handleGetExistDraftJson parse the Json data to draft object */
   handleGetExistDraftJson = (val: any): void => {
     if (typeof val !== "object" || val === null) {
       console.error("bad data from /load: not a record", val);

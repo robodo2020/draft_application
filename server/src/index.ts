@@ -9,7 +9,7 @@ const app = express();
 app.use(bodyParser.json());
 app.get("/api/dummy", Dummy);
 app.get("/api/load", loadExistDrafts);
-app.post("/api/save", updateDraft);
-
+app.post("/api/update", updateDraft);
 app.post("/api/add", addDraft);
+
 app.listen(port, () => console.log(`Server listening on ${port}`));
