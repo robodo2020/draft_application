@@ -50,7 +50,7 @@ export class ExistedDraft extends Component<ExistedProps, ExistedState> {
           ></input>
         </div>
 
-        {/* TODO: show the existed draft as option */}
+        {/* show the existed draft as option */}
         <label htmlFor="draftId">Draft ID: </label>
         <input
           id="draftId"

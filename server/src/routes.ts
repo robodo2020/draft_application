@@ -11,6 +11,7 @@ type Draft = {
 let INITDRAFTID: number = 0;
 
 // DraftMap is the main database to store all the Draft Information
+// TODO: change to use SQL server
 const DraftMap: Map<number, Draft> = new Map();
 
 /**
@@ -39,7 +40,13 @@ export function addDraft(req: Request, res: Response) {
     return;
   }
   // put data in our server side
-  const draft: Draft = makeDraft(rounds, options, drafters);
+  const draft: Draft | undefined = makeDraft(rounds, options, drafters);
+
+  if (draft === undefined) {
+    res.status(400).send("drafters cannot less than options");
+    console.error("Error: drafters cannot less than options");
+    return;
+  }
 
   DraftMap.set(INITDRAFTID, draft);
   console.log(DraftMap);
@@ -197,14 +204,23 @@ export function makeDraft(
   rounds: string,
   allOptions: string,
   drafters: string
-): Draft {
+): Draft | undefined {
+  const allOptionsList = toList(allOptions);
+  const allDraftersList = toList(drafters);
+
+  if (allDraftersList.length > allOptionsList.length) {
+    return undefined;
+  }
+
   const draft: Draft = {
     rounds: parseInt(rounds),
-    allOptions: toList(allOptions),
-    drafters: toList(drafters),
+    allOptions: allOptionsList,
+    drafters: allDraftersList,
     pickedOptions: [],
     pickQueue: [],
   };
+
+  // push drafter turn to pickQueue
   for (let i = 0; i < draft.rounds; i++) {
     for (const drafter of draft.drafters) {
       draft.pickQueue.push(drafter);
