@@ -5,10 +5,12 @@ import { Draft, parseDraft } from "./draft";
  * PickPageProps is the props that send data from parent component, which is app
  * @param initialDraft the draft data to interact with
  * @param curDrafterName the user input drafter name
+ * @param onBack the function button back to the main page
  */
 interface PickPageProps {
   initialDraft: Draft;
   curDrafterName: string;
+  onBack: () => void;
 }
 
 /**
@@ -104,11 +106,21 @@ export class PickPage extends Component<PickPageProps, PickPageState> {
             </button>
           </div>
         )}
+        <div>
+          <button type="button" onClick={this.handleBack}>
+            back
+          </button>
+        </div>
 
         {/* if complete, show it is complete */}
         {this.state.completed && <p>Draft is complete.</p>}
       </div>
     );
+  };
+
+  /** handleBack supports back to the main page */
+  handleBack = () => {
+    this.props.onBack();
   };
 
   /** handleRefresh refresh the pick page to the latest picking status */

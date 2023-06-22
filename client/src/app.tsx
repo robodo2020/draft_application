@@ -44,6 +44,7 @@ export class App extends Component<{}, AppState> {
         <PickPage
           initialDraft={this.state.page.draft}
           curDrafterName={this.state.curDrafterName}
+          onBack={this.handleBack}
         ></PickPage>
       );
     }
@@ -67,5 +68,10 @@ export class App extends Component<{}, AppState> {
    */
   handleDrafterNameChange = (curDrafterName: string): void => {
     this.setState({ curDrafterName: curDrafterName });
+  };
+
+  /** handleBack supports pick page to switch back to the main page */
+  handleBack = (): void => {
+    this.setState({ page: "main" });
   };
 }
