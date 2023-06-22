@@ -43,8 +43,8 @@ export function addDraft(req: Request, res: Response) {
   const draft: Draft | undefined = makeDraft(rounds, options, drafters);
 
   if (draft === undefined) {
-    res.status(400).send("drafters cannot less than options");
-    console.error("Error: drafters cannot less than options");
+    res.status(400).send("Error happens when creating draft object");
+    console.error("Error: the draft has invalid input");
     return;
   }
 
@@ -191,6 +191,11 @@ function first(param: any): string | undefined {
   }
 }
 
+/**
+ * toList supports to transform a string to list of items
+ * @param itemsString the original string items input from users
+ * @requires itemsString the item separats by '\n'
+ */
 function toList(itemsString: string): string[] {
   const itemsList: string[] = itemsString
     .split("\n")
@@ -200,6 +205,27 @@ function toList(itemsString: string): string[] {
   return itemsList;
 }
 
+/**
+ * checkAllItemValid checks whether the input contains invalid items
+ * @param itemsList the list of items, will check the drafters in the usage
+ * @returns boolean indicates the list is valid or not
+ */
+function checkAllItemValid(itemsList: string[]): boolean {
+  for (const item of itemsList) {
+    if (item === "COMPLETED!!!") {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * makeDraft is the facotry function to generate a Draft object
+ * @param rounds the num of rounds for this draft
+ * @param allOptions all the options of this draft
+ * @param drafters all the drafters of this draft
+ * @returns Draft object
+ */
 export function makeDraft(
   rounds: string,
   allOptions: string,
@@ -209,6 +235,12 @@ export function makeDraft(
   const allDraftersList = toList(drafters);
 
   if (allDraftersList.length > allOptionsList.length) {
+    console.error("Error: drafters cannot less than options");
+    return undefined;
+  }
+
+  if (!checkAllItemValid(allDraftersList)) {
+    console.error("Error: the Drafters contains invalid words");
     return undefined;
   }
 

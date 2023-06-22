@@ -110,13 +110,14 @@ export class NewDraft extends Component<NewDraftProps, NewDraftState> {
 
   /**
    * handleOptionsChange suports for changing the define all options
-   * @requires option cannot be "COMPLETED!!!"
    */
   handleOptionsChange = (evt: ChangeEvent<HTMLTextAreaElement>): void => {
     this.setState({ options: evt.target.value });
   };
 
-  /** handleDraftersChange suports for changing all the drafters */
+  /** handleDraftersChange suports for changing all the drafters
+   * @requires drafters cannot be "COMPLETED!!!"
+   */
   handleDraftersChange = (evt: ChangeEvent<HTMLTextAreaElement>): void => {
     this.setState({ drafters: evt.target.value });
   };
