@@ -231,10 +231,11 @@ export function makeDraft(
   allOptions: string,
   drafters: string
 ): Draft | undefined {
-  const allOptionsList = toList(allOptions);
-  const allDraftersList = toList(drafters);
+  const allOptionsList: string[] = toList(allOptions);
+  const allDraftersList: string[] = toList(drafters);
+  const roundsNum: number = parseInt(rounds);
 
-  if (allDraftersList.length > allOptionsList.length) {
+  if (allDraftersList.length * roundsNum > allOptionsList.length) {
     console.error("Error: drafters cannot less than options");
     return undefined;
   }
@@ -245,7 +246,7 @@ export function makeDraft(
   }
 
   const draft: Draft = {
-    rounds: parseInt(rounds),
+    rounds: roundsNum,
     allOptions: allOptionsList,
     drafters: allDraftersList,
     pickedOptions: [],
