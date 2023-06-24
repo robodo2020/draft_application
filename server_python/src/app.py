@@ -53,7 +53,6 @@ def add_draft():
         "drafters": draft.drafters,
         "nextPicker": draft.pick_queue[0],
     }
-    print(response_data)
 
     INIT_DRAFT_ID += 1
 
