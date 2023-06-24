@@ -16,6 +16,22 @@ class Draft:
         self.picked_options = picked_options  # option, drafter
         self.pick_queue = pick_queue
 
+    def print_parameters(self):
+        print(self.rounds)
+        print(self.all_options)
+        print(self.drafters)
+        print(self.picked_options)
+        print(self.pick_queue)
+        return
+
+    def check_next_picker(self):
+        next_picker = ""
+        if len(self.pick_queue) > 0:
+            next_picker = self.pick_queue[0]
+        else:
+            next_picker = "COMPLETED!!!"
+        return next_picker
+
     @staticmethod
     def to_list(items_str: str) -> List[str]:
         items_list = items_str.split("\n")
