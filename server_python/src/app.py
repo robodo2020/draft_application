@@ -90,7 +90,7 @@ def load_exist_drafts():
     next_picker = cur_draft.check_next_picker()
 
     response_data = {
-        "draftId": INIT_DRAFT_ID,
+        "draftId": draft_ID,
         "pickedOptions": cur_draft.picked_options,
         "rounds": cur_draft.rounds,
         "allOptions": cur_draft.all_options,
