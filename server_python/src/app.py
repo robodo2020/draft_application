@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from .draft import Draft
 from typing import Dict
 
-INIT_DRAFT_ID = 0
+INIT_DRAFT_ID: int = 0
 draft_map: Dict[int, Draft] = {}
 
 app = Flask(__name__)
@@ -13,7 +13,6 @@ def health():
     return "OK"
 
 
-# TODO: should method be both get and post?
 @app.route("/api/add", methods=["GET", "POST"])
 def add_draft():
     global INIT_DRAFT_ID
