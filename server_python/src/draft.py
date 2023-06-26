@@ -22,7 +22,6 @@ class Draft:
         print(self.drafters)
         print(self.picked_options)
         print(self.pick_queue)
-        return
 
     def check_next_picker(self):
         next_picker = ""
