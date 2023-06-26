@@ -1,5 +1,5 @@
 import pytest
-from src.draft import Draft
+from server_python.src.draft import Draft
 
 
 def test_draft_to_list():

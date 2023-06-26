@@ -1,6 +1,6 @@
 import json
 
-from src.app import app
+from server_python.src.app import app
 
 
 def test_health():

@@ -2,10 +2,18 @@
 
 ### Start the frontend server
 
-`npm run start`
+- `cd client && npm run start`
 
 ### Start the backend server
 
-`cd server_python`
+- `flask --app server_python/src/app run`
 
-`flask --app src/app run`
+### Test the code
+
+test unit test
+
+- `PYTHONPATH="${PYTHON_PATH}:./server_python/src" python -m pytest -v server_python/tests/unit`
+
+test functional test
+
+- `PYTHONPATH="${PYTHON_PATH}:./server_python/src" python -m pytest -v server_python/tests/functional`
