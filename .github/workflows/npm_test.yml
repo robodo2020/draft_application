@@ -1,4 +1,4 @@
-name: NodeJS with Grunt
+name: Setup npm and run test for client
 
 on:
   push:
