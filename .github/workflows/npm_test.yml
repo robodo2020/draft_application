@@ -27,5 +27,5 @@ jobs:
         cd client && npm install --no-audit
     - name: Run the test
       run: |
-        npm run test
+        cd client && npm run test
         
