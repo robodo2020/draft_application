@@ -31,6 +31,10 @@ def add_draft():
     if drafters is None or not isinstance(drafters, str):
         print(f"Error: missing {drafters} parameter")
         return f"missing {drafters} parameter", 400
+    print("----- options & drafters -----")
+    print(options)
+    print(drafters)
+    print("----- options & drafters -----")
 
     draft = Draft.make_draft(rounds, options, drafters)
     if draft is None:
