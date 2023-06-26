@@ -17,6 +17,9 @@ def health():
 @app.route("/api/add", methods=["GET", "POST"])
 def add_draft():
     global INIT_DRAFT_ID
+    print("----- url -----")
+    print(request.url)
+    print("----- url -----")
 
     rounds = request.args.get("rounds")
     if rounds is None or not isinstance(rounds, str):
