@@ -17,9 +17,6 @@ def health():
 @app.route("/api/add", methods=["GET", "POST"])
 def add_draft():
     global INIT_DRAFT_ID
-    print("----- url -----")
-    print(request.url)
-    print("----- url -----")
 
     rounds = request.args.get("rounds")
     if rounds is None or not isinstance(rounds, str):
@@ -37,10 +34,6 @@ def add_draft():
         return f"missing {drafters} parameter", 400
     decoded_options = urllib.parse.unquote(options)
     decoded_drafters = urllib.parse.unquote(drafters)
-    print("----- options & drafters -----")
-    print(decoded_options)
-    print(decoded_drafters)
-    print("----- options & drafters -----")
 
     draft = Draft.make_draft(rounds, decoded_options, decoded_drafters)
     if draft is None:
