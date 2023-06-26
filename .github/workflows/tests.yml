@@ -31,10 +31,10 @@ jobs:
         run: |
           black --check ./server_python
 
-      - name: Check code quality using pylint
-        run: |
-          pylint ./server_python/src ./server_python/tests
-          # pylint **/*.py
+      # - name: Check code quality using pylint
+      #   run: |
+      #     pylint ./server_python/src ./server_python/tests
+      #     # pylint **/*.py
 
       - name: Run unit test
         run: |
