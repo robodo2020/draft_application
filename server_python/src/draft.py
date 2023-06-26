@@ -34,9 +34,10 @@ class Draft:
     @staticmethod
     def to_list(items_str: str) -> List[str]:
         items_list = items_str.split("\n")
+        print(items_list)
         items_list = [item.strip() for item in items_list]
         items_list = [item for item in items_list if item]
-
+        print(items_list)
         return items_list
 
     @staticmethod
