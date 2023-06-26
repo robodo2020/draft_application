@@ -1,6 +1,7 @@
 import json
 
 from server_python.src.app import app
+from urllib import parse
 
 
 def test_health():
@@ -49,9 +50,10 @@ def test_end_to_end():
             "nextPicker": "COMPLETED!!!",
         }
 
-        response3 = test_client.post(
-            "/api/add?curDrafterName=ab&rounds=1&options=a\nb\nc\nd&drafters=ab\nbc\ncd\nde"
-        )
+        encoded_options = parse.quote("a\nb\nc\nd")
+        encoded_drafters = parse.quote("ab\nbc\ncd\nde")
+        url = f"/api/add?curDrafterName=ab&rounds=1&options={encoded_options}&drafters={encoded_drafters}"
+        response3 = test_client.post(url)
         assert response3.status_code == 200
         data3 = json.loads(response3.data)
         assert data3 == {
