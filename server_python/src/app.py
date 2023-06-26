@@ -1,6 +1,7 @@
 from typing import Dict
 from flask import Flask, request, jsonify
 from .draft import Draft
+import urllib.parse
 
 INIT_DRAFT_ID: int = 0
 draft_map: Dict[int, Draft] = {}
@@ -31,12 +32,14 @@ def add_draft():
     if drafters is None or not isinstance(drafters, str):
         print(f"Error: missing {drafters} parameter")
         return f"missing {drafters} parameter", 400
+    decoded_options = urllib.parse.unquote(options)
+    decoded_drafters = urllib.parse.unquote(drafters)
     print("----- options & drafters -----")
-    print(options)
-    print(drafters)
+    print(decoded_options)
+    print(decoded_drafters)
     print("----- options & drafters -----")
 
-    draft = Draft.make_draft(rounds, options, drafters)
+    draft = Draft.make_draft(rounds, decoded_options, decoded_drafters)
     if draft is None:
         print("Error: Error happens when creating draft object")
         return "Error happens when creating draft object", 400
