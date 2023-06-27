@@ -32,6 +32,7 @@ def add_draft():
     if drafters is None or not isinstance(drafters, str):
         print(f"Error: missing {drafters} parameter")
         return f"missing {drafters} parameter", 400
+
     decoded_options = urllib.parse.unquote(options)
     decoded_drafters = urllib.parse.unquote(drafters)
 
